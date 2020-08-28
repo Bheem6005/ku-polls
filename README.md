@@ -1,6 +1,6 @@
 # KU Polls
 
-Web application for KU staff and students to create online polls and surveys.
+Web application for KU staff and students to create online polls.
 
 ## Documents
 
