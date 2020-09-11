@@ -1,0 +1,4 @@
+# Packages needed to run this project
+Django >= 3.0.0
+python-decouple >= 3.1
+pytz >= 2019.2
