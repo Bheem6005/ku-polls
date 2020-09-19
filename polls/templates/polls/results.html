@@ -29,7 +29,7 @@
 {% if question.can_vote %}
 <a href="{% url 'polls:detail' question.id %}">Vote again?</a>
 {% else %}
-Vote again?
+Not in voting period.
 {% endif %}
 
 <br><br><a href="{% url 'polls:index' %}">Back to list of polls</a>

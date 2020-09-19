@@ -2,6 +2,14 @@
 
 <link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}">
 
+{% if not question.can_vote %}
+<html>
+   <head>
+      <meta http-equiv = "refresh" content = "0; url = {% url 'polls:index' %}" />
+   </head>
+</html>
+{% endif %}
+
 <h1>{{ question.question_text }}</h1>
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
