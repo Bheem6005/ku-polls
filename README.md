@@ -1,5 +1,8 @@
 # KU Polls
 
+[![Build Status](https://travis-ci.com/Bheem6005/ku-polls.svg?branch=master)](https://travis-ci.com/Bheem6005/ku-polls)
+[![codecov](https://codecov.io/gh/Bheem6005/ku-polls/branch/master/graph/badge.svg)](https://codecov.io/gh/Bheem6005/ku-polls)
+
 Web application for KU staff and students to create online polls.
 
 ## Requirements
