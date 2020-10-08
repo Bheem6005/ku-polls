@@ -9,7 +9,7 @@
     - pip install -r requirements.txt
       
   script:
-    - coverage run --rcfile=polls/.coveragerc -m unittest discover -p \"tests.py\"
+    - coverage run --rcfile=.coveragerc -m unittest discover -p \tests.py
 
   after_script:
     - bash <(curl -s https://codecov.io/bash)
