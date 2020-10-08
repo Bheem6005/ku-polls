@@ -1,9 +1,0 @@
-[run]
-
-branch = True
-
-cover_pylib = False
-
-omit =
-    polls/tests.py
-    polls/migrations/*
