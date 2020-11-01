@@ -1,6 +1,16 @@
 <html>
 <body>
 <h2>KUPolls Login</h2>
+
+{% for message in messages %}
+<div class="alert alert-success">
+    <a class="close" href="#" data-dismiss="alert">×</a>
+
+    {{ message }}
+
+</div>
+{% endfor %}
+
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
@@ -12,9 +22,6 @@
 
 <p>
     <a href="{% url 'signup' %}">Register</a>
-</p>
-<p>
-    <a href="{% url 'password_reset' %}">Forgot password?</a>
 </p>
 </body>
 </html>

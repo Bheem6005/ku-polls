@@ -1,14 +1,27 @@
 """View config for polls site."""
+import logging
 
+from django.contrib import messages
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
-from polls.forms import CreateUserForm
+from django.contrib.auth import authenticate, login, logout
+
+from polls.forms import CreateUserForm, LoginForm
 from .models import Choice, Question, Vote
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s: %(name)s: %(message)s')
+
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+
+logger.addHandler(handler)
 
 
 class IndexView(generic.ListView):
@@ -59,9 +72,13 @@ def vote(request, question_id):
             get_vote = Vote.objects.get(user=request.user)
             get_vote.choice_id = selected_choice.id
             get_vote.save()
+            logger.info('[Vote Submit]: Username: {}, Poll ID: {}'.format(request.user,
+                                                                          question_id))
         else:
             get_vote = Vote.objects.create(question=question, user=request.user, choice=selected_choice)
             get_vote.save()
+            logger.info('[Vote Submit]: Username: {}, Poll ID: {}'.format(request.user,
+                                                                          question_id))
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
 
 
@@ -76,10 +93,45 @@ def signup(request):
             raw_passwd = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_passwd)
             login(request, user)
+            logger.info('[Successful Login]: Username: {}, IP: {}'.format(request.POST['username'],
+                                                                          request.META.get('REMOTE_ADDR')))
             return HttpResponseRedirect(reverse('polls:index'))
     return render(request, 'registration/signup.html', {'form': form})
 
 
-def index(request):
+def login_page(request):
+    if request.user.is_authenticated:
+        return redirect('polls:index')
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            logger.info(
+                '[Successful Login]: Username: {}, IP: {}'.format(request.user.username,
+                                                                  request.META.get('REMOTE_ADDR')))
+            return HttpResponseRedirect(reverse('polls:index'))
+        else:
+            messages.error(request, 'Username or Password is incorrect')
+            logger.warning('[Unsuccessful Login]: Username: {}, IP: {}'.format(request.POST['username'],
+                                                                               request.META.get(
+                                                                                   'REMOTE_ADDR')))
+
+    return render(request, 'registration/login.html', {'form': LoginForm()})
+
+
+def logout_page(request):
+    logout(request)
+    logger.info(
+        '[Logout]: Username: {}, IP: {}'.format(request.user.username,
+                                                request.META.get('REMOTE_ADDR')))
+    return HttpResponseRedirect(reverse('login'))
+
+
+def index_page(request):
     """Redirect to the polls index."""
     return HttpResponseRedirect(reverse('polls:index'))
