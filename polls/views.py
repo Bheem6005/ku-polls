@@ -6,10 +6,9 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
-
-from .models import Choice, Question
+from polls.forms import CreateUserForm
+from .models import Choice, Question, Vote
 
 
 class IndexView(generic.ListView):
@@ -45,7 +44,6 @@ class ResultsView(generic.DetailView):
 @login_required(login_url='/accounts/login/')
 def vote(request, question_id):
     """Voting method."""
-    user = request.user
     question = get_object_or_404(Question, pk=question_id)
     try:
         selected_choice = question.choice_set.get(pk=request.POST['choice'])
@@ -56,27 +54,32 @@ def vote(request, question_id):
             'error_message': "You didn't select a choice.",
         })
     else:
-        selected_choice.votes += 1
-        selected_choice.save()
-        # Always return an HttpResponseRedirect after successfully dealing
-        # with POST data. This prevents data from being posted twice if a
-        # user hits the Back button.
+        already_vote = Vote.objects.filter(question=question_id, user=request.user).exists()
+        if already_vote:
+            get_vote = Vote.objects.get(user=request.user)
+            get_vote.choice_id = selected_choice.id
+            get_vote.save()
+        else:
+            get_vote = Vote.objects.create(question=question, user=request.user, choice=selected_choice)
+            get_vote.save()
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
 
 
 def signup(request):
     """Register a new user."""
+    form = CreateUserForm()
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CreateUserForm(request.POST)
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
-            raw_passwd = form.cleaned_data.get('password')
+            raw_passwd = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_passwd)
             login(request, user)
             return HttpResponseRedirect(reverse('polls:index'))
-        # what if form is not valid?
-        # we should display a message in signup.html
-    else:
-        form = UserCreationForm()
     return render(request, 'registration/signup.html', {'form': form})
+
+
+def index(request):
+    """Redirect to the polls index."""
+    return HttpResponseRedirect(reverse('polls:index'))
